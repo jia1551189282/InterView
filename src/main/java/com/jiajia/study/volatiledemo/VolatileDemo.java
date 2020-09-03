@@ -23,12 +23,40 @@ class MyData{
     public void add(){
         number = number + 60;
     }
+
+    /**
+     *  i++
+     */
+    public void addPlusPlus(){
+        number++;
+    }
 }
 
 public class VolatileDemo {
     public static void main(String[] args) {
         MyData myData = new MyData();
+        // 开启20个线程,每个线程加1000次  ,如果线程具有原子性的话，结果就会是20000
+        for (int i = 0; i < 20; i++) {
+            new Thread(() -> {
+                for (int j = 0; j < 1000; j++) {
+                    myData.addPlusPlus();
 
+                }
+            },String.valueOf(i)).start();
+        }
+        // 等待20个线程全部计算完成之后，看结果是否是20000
+        while (Thread.activeCount() >  2){
+            Thread.yield();
+        }
+
+        System.out.println("20个线程计算完成的结果是：" + myData.number);
+    }
+
+
+
+    // volatile 保证线程安全性
+    private static void keepVolatile() {
+        MyData myData = new MyData();
 
         new Thread(() -> {
             System.out.println("AAA 线程 开始执行，初始变量值是：" + myData.number);
