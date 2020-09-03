@@ -1,6 +1,7 @@
 package com.jiajia.study.volatiledemo;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author zjiajia
@@ -30,16 +31,30 @@ class MyData{
     public void addPlusPlus(){
         number++;
     }
+    // 使用原子类型 来解决 不满足原子性问题
+    AtomicInteger atomicInteger = new AtomicInteger();
+
+    public void addAtomic(){
+        atomicInteger.getAndIncrement();
+    }
 }
 
 public class VolatileDemo {
     public static void main(String[] args) {
+        notAtomic();
+    }
+
+    /**
+     * 不满足 原子性实验
+     */
+    private static void notAtomic() {
         MyData myData = new MyData();
         // 开启20个线程,每个线程加1000次  ,如果线程具有原子性的话，结果就会是20000
         for (int i = 0; i < 20; i++) {
             new Thread(() -> {
                 for (int j = 0; j < 1000; j++) {
                     myData.addPlusPlus();
+                    myData.addAtomic();
 
                 }
             },String.valueOf(i)).start();
@@ -50,8 +65,8 @@ public class VolatileDemo {
         }
 
         System.out.println("20个线程计算完成的结果是：" + myData.number);
+        System.out.println("20个线程计算完成的结果是：" + myData.atomicInteger);
     }
-
 
 
     // volatile 保证线程安全性
